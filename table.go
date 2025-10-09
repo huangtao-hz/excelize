@@ -431,6 +431,7 @@ func table_function_to_formula(function string, col_name string) (formula string
 	return
 }
 
+// setTableColumns2 增加对汇总函数的支持
 func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2 int, tbl *xlsxTable, columns []TableColumn) error {
 	tableColumns := make([]*xlsxTableColumn, len(columns))
 	for i, column := range columns {
