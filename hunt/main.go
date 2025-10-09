@@ -16,6 +16,7 @@ func main() {
 	}()
 	book := excelize.NewFile()
 	sheet := "Sheet1"
+	book.SetSheetName("Sheet1", "[sheet1]")
 	book.SetSheetRow(sheet, "A2", &[]any{"你好", 13, 25})
 	book.SetSheetRow(sheet, "A3", &[]any{"你好", 14, 27})
 	err = book.AddTable(sheet, &excelize.Table{
