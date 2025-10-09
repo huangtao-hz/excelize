@@ -231,6 +231,16 @@ type xlsxXMLCellPr struct {
 	ExtLst     *xlsxInnerXML `xml:"extLst"`
 }
 
+// TableCloumn directly maps the format settings of the table column.
+type TableColumn struct {
+	Name               string `xml:"name,attr"`
+	TotalsRowFunction  string `xml:"totalsRowFunction,attr,omitempty"`
+	TotalsRowLabel     string `xml:"totalsRowLabel,attr,omitempty"`
+	HeaderRowCellStyle string `xml:"headerRowCellStyle,attr,omitempty"`
+	DataCellStyle      string `xml:"dataCellStyle,attr,omitempty"`
+	TotalsRowCellStyle string `xml:"totalsRowCellStyle,attr,omitempty"`
+}
+
 // Table directly maps the format settings of the table.
 type Table struct {
 	tID               int
@@ -244,6 +254,7 @@ type Table struct {
 	ShowHeaderRow     *bool
 	ShowLastColumn    bool
 	ShowRowStripes    *bool
+	Columns           []TableColumn
 }
 
 // AutoFilterOptions directly maps the auto filter settings.

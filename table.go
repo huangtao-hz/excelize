@@ -379,7 +379,7 @@ func (f *File) addTable(sheet, tableXML string, x1, y1, x2, y2, i int, opts *Tab
 		DisplayName: name,
 		Ref:         ref,
 		AutoFilter: &xlsxAutoFilter{
-			Ref: ref,
+			Ref: "A1:C3",
 		},
 		TableStyleInfo: &xlsxTableStyleInfo{
 			Name:              opts.StyleName,
@@ -389,7 +389,12 @@ func (f *File) addTable(sheet, tableXML string, x1, y1, x2, y2, i int, opts *Tab
 			ShowColumnStripes: opts.ShowColumnStripes,
 		},
 	}
-	_ = f.setTableColumns(sheet, !hideHeaderRow, x1, y1, x2, &t)
+	// 与源代码保持兼容
+	if opts.Columns == nil {
+		_ = f.setTableColumns(sheet, !hideHeaderRow, x1, y1, x2, &t)
+	} else {
+		_ = f.setTableColumns2(sheet, hideHeaderRow, x1, y1, x2, y2, &t, opts.Columns)
+	}
 	if hideHeaderRow {
 		t.AutoFilter = nil
 		t.HeaderRowCount = intPtr(0)
@@ -397,6 +402,75 @@ func (f *File) addTable(sheet, tableXML string, x1, y1, x2, y2, i int, opts *Tab
 	table, err := xml.Marshal(t)
 	f.saveFileList(tableXML, table)
 	return err
+}
+
+// table_function_to_formula Convert a table total function to a worksheet formula.
+func table_function_to_formula(function string, col_name string) (formula string, err error) {
+	//s Escape special characters, as required by Excel.
+	col_name = strings.ReplaceAll(col_name, "'", "''")
+	col_name = strings.ReplaceAll(col_name, "#", "'#")
+	col_name = strings.ReplaceAll(col_name, "]", "']")
+	col_name = strings.ReplaceAll(col_name, "[", "'[")
+
+	subtotals := map[string]int{
+		"average":   101,
+		"countNums": 102,
+		"count":     103,
+		"max":       104,
+		"min":       105,
+		"stdDev":    107,
+		"sum":       109,
+		"var":       110,
+	}
+
+	if func_num, ok := subtotals[function]; ok {
+		formula = fmt.Sprintf("SUBTOTAL(%d,[%s])", func_num, col_name)
+	} else {
+		err = fmt.Errorf("Unsupported function '%s' in add_table()", function)
+	}
+	return
+}
+
+func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2 int, tbl *xlsxTable, columns []TableColumn) error {
+	tableColumns := make([]*xlsxTableColumn, len(columns))
+	for i, column := range columns {
+		tableColumns[i] = &xlsxTableColumn{
+			ID:                 i + 1,
+			Name:               column.Name,
+			TotalsRowLabel:     column.TotalsRowLabel,
+			TotalsRowFunction:  column.TotalsRowFunction,
+			TotalsRowCellStyle: column.TotalsRowCellStyle,
+			DataCellStyle:      column.DataCellStyle,
+			HeaderRowCellStyle: column.HeaderRowCellStyle,
+			TotalsRowDxfID:     0,
+		}
+		cell, err := CoordinatesToCellName(x1+i, y2)
+		if err != nil {
+			return err
+		}
+		if column.TotalsRowLabel != "" {
+			tbl.TotalsRowCount = 1
+			f.SetCellStr(sheet, cell, column.TotalsRowLabel)
+		} else if column.TotalsRowFunction != "" {
+			if formula, err := table_function_to_formula(column.TotalsRowFunction, column.Name); err == nil {
+				f.SetCellFormula(sheet, cell, formula)
+			} else {
+				return err
+			}
+		}
+		if !hideHeaderRow {
+			cell, err := CoordinatesToCellName(x1+i, y1)
+			if err != nil {
+				return err
+			}
+			f.SetCellStr(sheet, cell, column.Name)
+		}
+	}
+	tbl.TableColumns = &xlsxTableColumns{
+		Count:       len(tableColumns),
+		TableColumn: tableColumns,
+	}
+	return nil
 }
 
 // AutoFilter provides the method to add auto filter in a worksheet by given
