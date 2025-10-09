@@ -379,7 +379,7 @@ func (f *File) addTable(sheet, tableXML string, x1, y1, x2, y2, i int, opts *Tab
 		DisplayName: name,
 		Ref:         ref,
 		AutoFilter: &xlsxAutoFilter{
-			Ref: "A1:C3",
+			Ref: ref,
 		},
 		TableStyleInfo: &xlsxTableStyleInfo{
 			Name:              opts.StyleName,
@@ -445,27 +445,35 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			HeaderRowCellStyle: column.HeaderRowCellStyle,
 			TotalsRowDxfID:     0,
 		}
-		cell, err := CoordinatesToCellName(x1+i, y2)
+		total_cell, err := CoordinatesToCellName(x1+i, y2)
 		if err != nil {
 			return err
 		}
 		if column.TotalsRowLabel != "" {
 			tbl.TotalsRowCount = 1
-			f.SetCellStr(sheet, cell, column.TotalsRowLabel)
+			f.SetCellStr(sheet, total_cell, column.TotalsRowLabel)
 		} else if column.TotalsRowFunction != "" {
+			tbl.TotalsRowCount = 1
 			if formula, err := table_function_to_formula(column.TotalsRowFunction, column.Name); err == nil {
-				f.SetCellFormula(sheet, cell, formula)
+				f.SetCellFormula(sheet, total_cell, formula)
 			} else {
 				return err
 			}
 		}
 		if !hideHeaderRow {
-			cell, err := CoordinatesToCellName(x1+i, y1)
+			head_cell, err := CoordinatesToCellName(x1+i, y1)
 			if err != nil {
 				return err
 			}
-			f.SetCellStr(sheet, cell, column.Name)
+			f.SetCellStr(sheet, head_cell, column.Name)
 		}
+	}
+	if tbl.TotalsRowCount > 1 {
+		ref, err := coordinatesToRangeRef([]int{x1, y1, x2, y2})
+		if err != nil {
+			return err
+		}
+		tbl.AutoFilter.Ref = ref
 	}
 	tbl.TableColumns = &xlsxTableColumns{
 		Count:       len(tableColumns),
