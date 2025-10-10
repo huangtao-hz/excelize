@@ -445,7 +445,7 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			HeaderRowCellStyle: column.HeaderRowCellStyle,
 			TotalsRowDxfID:     0,
 		}
-		total_cell, err := CoordinatesToCellName(x1+i, y2)
+		total_cell, err := CoordinatesToCellName(x1+i, y2+1)
 		if err != nil {
 			return err
 		}
@@ -468,11 +468,11 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			f.SetCellStr(sheet, head_cell, column.Name)
 		}
 	}
-	if tbl.TotalsRowCount > 1 {
-		if ref, err := coordinatesToRangeRef([]int{x1, y1, x2, y2}); err != nil {
+	if tbl.TotalsRowCount > 0 {
+		if ref, err := coordinatesToRangeRef([]int{x1, y1, x2, y2 + 1}); err != nil {
 			return err
 		} else {
-			tbl.AutoFilter.Ref = ref
+			tbl.Ref = ref
 		}
 	}
 	tbl.TableColumns = &xlsxTableColumns{

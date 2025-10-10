@@ -20,7 +20,7 @@ func main() {
 	book.SetSheetRow(sheet, "A2", &[]any{"你好", 13, 25})
 	book.SetSheetRow(sheet, "A3", &[]any{"你好", 14, 27})
 	err = book.AddTable(sheet, &excelize.Table{
-		Range:     "A1:C4",
+		Range:     "A1:C3",
 		StyleName: "TableStyleMedium2",
 		Columns: []excelize.TableColumn{
 			excelize.TableColumn{
