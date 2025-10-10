@@ -1,4 +1,4 @@
-module excelize
+module github.com/huangtao-hz/excelize
 
 go 1.24.0
 
