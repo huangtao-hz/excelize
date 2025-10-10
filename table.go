@@ -469,11 +469,11 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 		}
 	}
 	if tbl.TotalsRowCount > 1 {
-		ref, err := coordinatesToRangeRef([]int{x1, y1, x2, y2})
-		if err != nil {
+		if ref, err := coordinatesToRangeRef([]int{x1, y1, x2, y2}); err != nil {
 			return err
+		} else {
+			tbl.AutoFilter.Ref = ref
 		}
-		tbl.AutoFilter.Ref = ref
 	}
 	tbl.TableColumns = &xlsxTableColumns{
 		Count:       len(tableColumns),
