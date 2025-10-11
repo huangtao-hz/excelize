@@ -189,6 +189,8 @@ type xlsxTableColumn struct {
 	HeaderRowCellStyle string `xml:"headerRowCellStyle,attr,omitempty"`
 	DataCellStyle      string `xml:"dataCellStyle,attr,omitempty"`
 	TotalsRowCellStyle string `xml:"totalsRowCellStyle,attr,omitempty"`
+	Formula            string `xml:"calculatedColumnFormula,omitempty"`
+	TotalsRowFormula   string `xml:"totalsRowFormula,omitempty"`
 }
 
 // xlsxTableStyleInfo directly maps the tableStyleInfo element. This element
@@ -239,6 +241,7 @@ type TableColumn struct {
 	HeaderRowCellStyle string `xml:"headerRowCellStyle,attr,omitempty"`
 	DataCellStyle      string `xml:"dataCellStyle,attr,omitempty"`
 	TotalsRowCellStyle string `xml:"totalsRowCellStyle,attr,omitempty"`
+	Formula            string `xml:"calculatedColumnFormula"`
 }
 
 // Table directly maps the format settings of the table.

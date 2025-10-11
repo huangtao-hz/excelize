@@ -84,7 +84,7 @@ func (f *File) AddTable(sheet string, table *Table) error {
 		return err
 	}
 	var exist bool
-	f.Pkg.Range(func(k, v interface{}) bool {
+	f.Pkg.Range(func(k, v any) bool {
 		if strings.Contains(k.(string), "xl/tables/table") {
 			var t xlsxTable
 			if err := f.xmlNewDecoder(bytes.NewReader(namespaceStrictToTransitional(v.([]byte)))).
@@ -426,6 +426,7 @@ func table_function_to_formula(function string, col_name string) (formula string
 	if func_num, ok := subtotals[function]; ok {
 		formula = fmt.Sprintf("SUBTOTAL(%d,[%s])", func_num, col_name)
 	} else {
+		formula = "custom"
 		err = fmt.Errorf("Unsupported function '%s' in add_table()", function)
 	}
 	return
@@ -443,6 +444,7 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			TotalsRowCellStyle: column.TotalsRowCellStyle,
 			DataCellStyle:      column.DataCellStyle,
 			HeaderRowCellStyle: column.HeaderRowCellStyle,
+			Formula:            column.Formula,
 			TotalsRowDxfID:     0,
 		}
 		total_cell, err := CoordinatesToCellName(x1+i, y2+1)
@@ -454,10 +456,26 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			f.SetCellStr(sheet, total_cell, column.TotalsRowLabel)
 		} else if column.TotalsRowFunction != "" {
 			tbl.TotalsRowCount = 1
-			if formula, err := table_function_to_formula(column.TotalsRowFunction, column.Name); err == nil {
+			formula, err := table_function_to_formula(column.TotalsRowFunction, column.Name)
+			if err == nil {
 				f.SetCellFormula(sheet, total_cell, formula)
 			} else {
-				return err
+				tableColumns[i].TotalsRowFunction = formula
+				tableColumns[i].TotalsRowFormula = column.TotalsRowFunction
+				f.SetCellFormula(sheet, total_cell, column.TotalsRowFunction)
+			}
+		}
+		if column.Formula != "" {
+			y := y1
+			if !hideHeaderRow {
+				y++
+			}
+			for ; y <= y2; y++ {
+				cell, err := CoordinatesToCellName(x1+i, y)
+				if err != nil {
+					return err
+				}
+				f.SetCellFormula(sheet, cell, column.Formula)
 			}
 		}
 		if !hideHeaderRow {

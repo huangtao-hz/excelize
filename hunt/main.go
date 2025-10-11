@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
-	"github.com/huangtao-hz/excelize"
+	//"github.com/huangtao-hz/excelize"
+
+	"excelize"
 )
 
 func main() {
@@ -21,7 +25,7 @@ func main() {
 	book.SetSheetRow(sheet, "A2", &[]any{"你好", 13, 25})
 	book.SetSheetRow(sheet, "A3", &[]any{"你好", 14, 27})
 	err = book.AddTable(sheet, &excelize.Table{
-		Range:     "A1:C3",
+		Range:     "A1:D3",
 		StyleName: "TableStyleMedium2",
 		Columns: []excelize.TableColumn{
 			excelize.TableColumn{
@@ -36,13 +40,21 @@ func main() {
 				Name:              "分数",
 				TotalsRowFunction: "countNums",
 			},
+			excelize.TableColumn{
+				Name:              "泰勒",
+				Formula:           "[分数]*10",
+				TotalsRowFunction: "Table1[[#Totals],[分数]]*10",
+			},
 		},
 	})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	err = book.SaveAs("/Users/huangtao/abc.xlsx")
-
+	if home, err := os.UserHomeDir(); err == nil {
+		err = book.SaveAs(filepath.Join(home, "abc.xlsx"))
+		fmt.Println(filepath.Join(home, "abc.xlsx"))
+	} else {
+		fmt.Println(err)
+	}
 }
