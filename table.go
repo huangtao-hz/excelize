@@ -460,6 +460,7 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			if err == nil {
 				f.SetCellFormula(sheet, total_cell, formula)
 			} else {
+				tableColumns[i].TotalsRowFunction = formula
 				tableColumns[i].TotalsRowFormula = column.TotalsRowFunction
 				f.SetCellFormula(sheet, total_cell, column.TotalsRowFunction)
 			}
