@@ -236,12 +236,12 @@ type xlsxXMLCellPr struct {
 // TableCloumn directly maps the format settings of the table column.
 type TableColumn struct {
 	Name               string `xml:"name,attr"`
-	TotalsRowFunction  string `xml:"totalsRowFunction,attr,omitempty"`
-	TotalsRowLabel     string `xml:"totalsRowLabel,attr,omitempty"`
-	HeaderRowCellStyle string `xml:"headerRowCellStyle,attr,omitempty"`
-	DataCellStyle      string `xml:"dataCellStyle,attr,omitempty"`
-	TotalsRowCellStyle string `xml:"totalsRowCellStyle,attr,omitempty"`
-	Formula            string `xml:"calculatedColumnFormula"`
+	TotalsRowFunction  string `xml:"total_function,attr,omitempty"`
+	TotalsRowLabel     string `xml:"total_string,attr,omitempty"`
+	HeaderRowCellStyle string `xml:"header_format,attr,omitempty"`
+	DataCellStyle      string `xml:"format,attr,omitempty"`
+	TotalsRowCellStyle string `xml:"total_format,attr,omitempty"`
+	Formula            string `xml:"formula,omitempty"`
 }
 
 // Table directly maps the format settings of the table.
@@ -249,15 +249,15 @@ type Table struct {
 	tID               int
 	rID               string
 	tableXML          string
-	Range             string
-	Name              string
-	StyleName         string
-	ShowColumnStripes bool
-	ShowFirstColumn   bool
-	ShowHeaderRow     *bool
-	ShowLastColumn    bool
-	ShowRowStripes    *bool
-	Columns           []TableColumn
+	Range             string        `xml:"range,attr"`
+	Name              string        `xml:"name,attr"`
+	StyleName         string        `xml:"style,attr"`
+	ShowColumnStripes bool          `xml:"band_columns,attr"`
+	ShowFirstColumn   bool          `xml:"first_column,attr"`
+	ShowHeaderRow     *bool         `xml:"header_row,attr"`
+	ShowLastColumn    bool          `xml:"last_column,attr"`
+	ShowRowStripes    *bool         `xml:"baned_columns,attr"`
+	Columns           []TableColumn `xml:"columns"`
 }
 
 // AutoFilterOptions directly maps the auto filter settings.
