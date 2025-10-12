@@ -60,6 +60,7 @@ type File struct {
 	VolatileDeps     *xlsxVolTypes
 	WorkBook         *xlsxWorkbook
 	ZipWriter        func(io.Writer) ZipWriter
+	dxfs             map[int]int // SytleId 与 DxfId 的映射表
 }
 
 // ZipWriter defines an interface for writing files to a ZIP archive. It

@@ -184,8 +184,8 @@ type xlsxTableColumn struct {
 	TotalsRowLabel     string `xml:"totalsRowLabel,attr,omitempty"`
 	QueryTableFieldID  int    `xml:"queryTableFieldId,attr,omitempty"`
 	HeaderRowDxfID     int    `xml:"headerRowDxfId,attr,omitempty"`
-	DataDxfID          int    `xml:"dataDxfId,attr,omitempty"`
-	TotalsRowDxfID     int    `xml:"totalsRowDxfId,attr,omitempty"`
+	DataDxfID          string `xml:"dataDxfId,attr,omitempty"`
+	TotalsRowDxfID     string `xml:"totalsRowDxfId,attr,omitempty"`
 	HeaderRowCellStyle string `xml:"headerRowCellStyle,attr,omitempty"`
 	DataCellStyle      string `xml:"dataCellStyle,attr,omitempty"`
 	TotalsRowCellStyle string `xml:"totalsRowCellStyle,attr,omitempty"`

@@ -52,6 +52,7 @@ func NewFile(opts ...Options) *File {
 	f.Sheet.Store("xl/worksheets/sheet1.xml", ws)
 	f.Theme, _ = f.themeReader()
 	f.options = f.getOptions(opts...)
+	f.dxfs = make(map[int]int) // 初始化 StyleId 与 DxfId 的映射表
 	return f
 }
 

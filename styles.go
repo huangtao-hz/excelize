@@ -1610,10 +1610,10 @@ func (f *File) GetStyle(idx int) (*Style, error) {
 	var style *Style
 	f.mu.Lock()
 	s, err := f.stylesReader()
+	f.mu.Unlock()
 	if err != nil {
 		return style, err
 	}
-	f.mu.Unlock()
 	if idx < 0 || s.CellXfs == nil || len(s.CellXfs.Xf) <= idx {
 		return style, newInvalidStyleID(idx)
 	}
@@ -1636,6 +1636,37 @@ func (f *File) GetStyle(idx int) (*Style, error) {
 	}
 	f.extractNumFmt(xf.NumFmtID, s, style)
 	return style, nil
+}
+
+// GetDxfId 获取指定 StyleId 对应的 DxfId
+func (f *File) GetDxfId(styleId int) (DxfId int, err error) {
+	var ok bool
+	if DxfId, ok = f.dxfs[styleId]; ok {
+		return
+	}
+	f.mu.Lock()
+	s, err := f.stylesReader()
+	f.mu.Unlock()
+	if err != nil {
+		return DxfId, err
+	}
+	style, err := f.GetStyle(styleId)
+	if err != nil {
+		return DxfId, err
+	}
+	dxf := &xlsxDxf{
+		Font:       style.Font.newFont(),
+		Fill:       newFills(style, true),
+		Alignment:  newAlignment(style),
+		Border:     newBorders(style),
+		Protection: newProtection(style),
+	}
+	DxfId = len(s.Dxfs.Dxfs)
+	f.dxfs[styleId] = DxfId
+	s.Dxfs.Count = DxfId + 1
+	dxf.NumFmt = newDxfNumFmt(s, style, dxf)
+	s.Dxfs.Dxfs = append(s.Dxfs.Dxfs, dxf)
+	return
 }
 
 // getStyleID provides a function to get styleID by given style. If given
@@ -1673,11 +1704,11 @@ func (f *File) getStyleID(ss *xlsxStyleSheet, style *Style) (int, error) {
 func (f *File) NewConditionalStyle(style *Style) (int, error) {
 	f.mu.Lock()
 	s, err := f.stylesReader()
+	f.mu.Unlock()
 	if err != nil {
-		f.mu.Unlock()
 		return 0, err
 	}
-	f.mu.Unlock()
+
 	fs, err := parseFormatStyleSet(style)
 	if err != nil {
 		return 0, err

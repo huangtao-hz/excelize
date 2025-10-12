@@ -305,7 +305,7 @@ func (f *File) setTableColumns(sheet string, showHeaderRow bool, x1, y1, x2 int,
 		}
 		header = append(header, name)
 		if column := getTableColumn(name); column != nil {
-			column.ID, column.DataDxfID, column.QueryTableFieldID = idx, 0, 0
+			column.ID, column.DataDxfID, column.QueryTableFieldID = idx, "", 0
 			tableColumns = append(tableColumns, column)
 			continue
 		}
@@ -437,15 +437,43 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 	tableColumns := make([]*xlsxTableColumn, len(columns))
 	for i, column := range columns {
 		tableColumns[i] = &xlsxTableColumn{
-			ID:                 i + 1,
-			Name:               column.Name,
-			TotalsRowLabel:     column.TotalsRowLabel,
-			TotalsRowFunction:  column.TotalsRowFunction,
+			ID:                i + 1,
+			Name:              column.Name,
+			TotalsRowLabel:    column.TotalsRowLabel,
+			TotalsRowFunction: column.TotalsRowFunction,
+			Formula:           column.Formula,
+		}
+		/*
 			TotalsRowCellStyle: column.TotalsRowCellStyle,
 			DataCellStyle:      column.DataCellStyle,
 			HeaderRowCellStyle: column.HeaderRowCellStyle,
-			Formula:            column.Formula,
-			TotalsRowDxfID:     0,
+		*/
+		if column.DataCellStyle != "" {
+			styleId, err := strconv.Atoi(column.DataCellStyle)
+			y := y1
+			if !hideHeaderRow {
+				y++
+			}
+			cell1, _ := CoordinatesToCellName(x1+i, y)
+			cell2, _ := CoordinatesToCellName(x1+i, y2)
+
+			f.SetCellStyle(sheet, cell1, cell2, styleId)
+
+			dfxId, err := f.GetDxfId(styleId)
+			if err != nil {
+				return err
+			}
+			tableColumns[i].DataDxfID = fmt.Sprint(dfxId)
+		}
+		if column.TotalsRowCellStyle != "" {
+			styleId, err := strconv.Atoi(column.TotalsRowCellStyle)
+			dfxId, err := f.GetDxfId(styleId)
+			if err != nil {
+				return err
+			}
+			cell2, _ := CoordinatesToCellName(x1+i, y2+1)
+			f.SetCellStyle(sheet, cell2, cell2, styleId)
+			tableColumns[i].DataDxfID = fmt.Sprint(dfxId)
 		}
 		total_cell, err := CoordinatesToCellName(x1+i, y2+1)
 		if err != nil {

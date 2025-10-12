@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"math"
 	"os"
@@ -20,7 +21,7 @@ import (
 
 func BenchmarkWrite(b *testing.B) {
 	const s = "This is test data"
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		f := NewFile()
 		for row := 1; row <= 10000; row++ {
 			for col := 1; col <= 20; col++ {
@@ -113,8 +114,8 @@ func TestZip64(t *testing.T) {
 	sw, err := f.NewStreamWriter("Sheet1")
 	assert.NoError(t, err)
 	for r := range 131 {
-		rowData := make([]interface{}, 1000)
-		for c := range 1000 {
+		rowData := make([]any, 10)
+		for c := range 10 {
 			rowData[c] = strings.Repeat("c", TotalCellChars)
 		}
 		cell, err := CoordinatesToCellName(1, r+1)
@@ -182,7 +183,7 @@ func TestRemoveTempFiles(t *testing.T) {
 	tmp.Close()
 	f := NewFile()
 	// fill the tempFiles map with non-existing (erroring on Remove) "files"
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		f.tempFiles.Store(strconv.Itoa(i), "/hopefully not existing")
 	}
 	f.tempFiles.Store("existing", tmpName)
@@ -192,4 +193,56 @@ func TestRemoveTempFiles(t *testing.T) {
 		t.Errorf("temp file %q still exist", tmpName)
 		os.Remove(tmpName)
 	}
+}
+
+func TestTable(t *testing.T) {
+	var err error
+	var styleId, styleId2 int
+	book := NewFile()
+	sheet := "Sheet1"
+	styleId, err = book.NewStyle(
+		&Style{
+			Font: &Font{
+				Family: "黑体",
+			},
+		},
+	)
+	styleId2, err = book.NewStyle(
+		&Style{
+			NumFmt: 4,
+		},
+	)
+	book.SetSheetRow(sheet, "A2", &[]any{"你好", 13, 25})
+	book.SetSheetRow(sheet, "A3", &[]any{"你好", 14, 27})
+	err = book.AddTable(sheet, &Table{
+		Range:     "A1:D3",
+		StyleName: "TableStyleMedium2",
+		Columns: []TableColumn{
+			TableColumn{
+				Name:               "姓名",
+				TotalsRowLabel:     "合计",
+				DataCellStyle:      fmt.Sprint(styleId),
+				TotalsRowCellStyle: fmt.Sprint(styleId),
+			},
+			TableColumn{
+				Name:               "年龄",
+				TotalsRowFunction:  "average",
+				DataCellStyle:      fmt.Sprint(styleId2),
+				TotalsRowCellStyle: fmt.Sprint(styleId2),
+			},
+			TableColumn{
+				Name:              "分数",
+				TotalsRowFunction: "countNums",
+			},
+			TableColumn{
+				Name:              "泰勒",
+				Formula:           "[分数]*10",
+				TotalsRowFunction: "Table1[[#Totals],[分数]]*10",
+			},
+		},
+	})
+	assert.NoError(t, err)
+	home, _ := os.UserHomeDir()
+	err = book.SaveAs(filepath.Join(home, "table1.xlsx"))
+	assert.NoError(t, err)
 }

@@ -10,6 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetDxfId(t *testing.T) {
+	f := NewFile()
+	styleId, err := f.NewStyle(
+		&Style{
+			Font: &Font{
+				Family: "黑体",
+			},
+		},
+	)
+	assert.NoError(t, err, "测试 TestGetDxfId 失败")
+	fid, err := f.GetDxfId(styleId)
+	assert.NoError(t, err, "测试 TestGetDxfId 失败")
+	assert.Equal(t, fid, 0)
+}
+
 func TestStyleFill(t *testing.T) {
 	cases := []struct {
 		label      string
