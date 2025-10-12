@@ -219,7 +219,7 @@ func (f *File) getTables() (map[string][]Table, error) {
 // folder xl/tables.
 func (f *File) countTables() int {
 	count := 0
-	f.Pkg.Range(func(k, v interface{}) bool {
+	f.Pkg.Range(func(k, v any) bool {
 		if strings.Contains(k.(string), "xl/tables/tableSingleCells") {
 			var cells xlsxSingleXMLCells
 			if err := f.xmlNewDecoder(bytes.NewReader(namespaceStrictToTransitional(v.([]byte)))).
@@ -512,6 +512,13 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 				return err
 			}
 			f.SetCellStr(sheet, head_cell, column.Name)
+			if column.HeaderRowCellStyle != "" {
+				styleId, err := strconv.Atoi(column.HeaderRowCellStyle)
+				if err != nil {
+					return err
+				}
+				f.SetCellStyle(sheet, head_cell, head_cell, styleId)
+			}
 		}
 	}
 	if tbl.TotalsRowCount > 0 {
