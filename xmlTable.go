@@ -235,13 +235,13 @@ type xlsxXMLCellPr struct {
 
 // TableCloumn directly maps the format settings of the table column.
 type TableColumn struct {
-	Name               string `xml:"name,attr"`
-	TotalsRowFunction  string `xml:"total_function,attr,omitempty"`
-	TotalsRowLabel     string `xml:"total_string,attr,omitempty"`
-	HeaderRowCellStyle string `xml:"header_format,attr,omitempty"`
-	DataCellStyle      string `xml:"format,attr,omitempty"`
-	TotalsRowCellStyle string `xml:"total_format,attr,omitempty"`
-	Formula            string `xml:"formula,omitempty"`
+	Name               string `toml:"name"`
+	TotalsRowFunction  string `toml:"total_function"`
+	TotalsRowLabel     string `toml:"total_string"`
+	HeaderRowCellStyle string `toml:"header_format"`
+	DataCellStyle      string `toml:"format"`
+	TotalsRowCellStyle string `toml:"total_format"`
+	Formula            string `toml:"formula"`
 }
 
 // Table directly maps the format settings of the table.
@@ -249,15 +249,15 @@ type Table struct {
 	tID               int
 	rID               string
 	tableXML          string
-	Range             string        `xml:"range,attr"`
-	Name              string        `xml:"name,attr"`
-	StyleName         string        `xml:"style,attr"`
-	ShowColumnStripes bool          `xml:"band_columns,attr"`
-	ShowFirstColumn   bool          `xml:"first_column,attr"`
-	ShowHeaderRow     *bool         `xml:"header_row,attr"`
-	ShowLastColumn    bool          `xml:"last_column,attr"`
-	ShowRowStripes    *bool         `xml:"baned_columns,attr"`
-	Columns           []TableColumn `xml:"columns"`
+	Range             string        `toml:"range"`
+	Name              string        `toml:"name"`
+	StyleName         string        `toml:"style"`
+	ShowColumnStripes bool          `toml:"band_columns"`
+	ShowFirstColumn   bool          `toml:"first_column"`
+	ShowHeaderRow     *bool         `toml:"header_row"`
+	ShowLastColumn    bool          `toml:"last_column"`
+	ShowRowStripes    *bool         `toml:"band_rows"`
+	Columns           []TableColumn `toml:"column"`
 }
 
 // AutoFilterOptions directly maps the auto filter settings.

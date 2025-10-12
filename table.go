@@ -456,9 +456,7 @@ func (f *File) setTableColumns2(sheet string, hideHeaderRow bool, x1, y1, x2, y2
 			}
 			cell1, _ := CoordinatesToCellName(x1+i, y)
 			cell2, _ := CoordinatesToCellName(x1+i, y2)
-
 			f.SetCellStyle(sheet, cell1, cell2, styleId)
-
 			dfxId, err := f.GetDxfId(styleId)
 			if err != nil {
 				return err
